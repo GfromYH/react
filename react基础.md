@@ -74,7 +74,6 @@ react中有jsx语法例如html标签引入，一般使用jsx语法需要在对�
 
 
 
-
 ------
 
 ### 事件响应式以及事件绑定
@@ -295,4 +294,97 @@ props或者state值改变了，render()函数就执行一次，所以就会有�
 8. 直接 操作DOM，显示新的DOM
 
 + diff算法
+
+![1561626639235](C:\Users\ZX50V\AppData\Roaming\Typora\typora-user-images\1561626639235.png)
+
+1. diff算法是同层之间比较，并且只比较一层，当你第一层不一样时，他就不比较下面的了，直接删除第一层以下的所有节点，并将新的虚拟DOM修改到原始虚拟DOM，虽然这样做在渲染虚拟DOM上不是很好，但是算法简单，节省了比较时间
+2. react中触发diff算法一般都是在setState这个异步函数中进行的，当多个setS塔特、调用时，react会将多个setState当成一个，生成一个虚拟DOM，进行一次比较，而不会多次生成虚拟DOM
+3. key值是唯一的，且循环时最好不要用index作为key值，因为index会改变，二key需要稳定的，当前几个的值未被改变时，只添加一个新的属性值，那么绑定了key值就会节省比较的时间优化性能，而为绑定key值则会重新比较，相对来说会消耗性能
+
+![1561627023197](C:\Users\ZX50V\AppData\Roaming\Typora\typora-user-images\1561627023197.png)
+
+------
+
+### ref
+
+~~~javascript
+ <input
+    value={this.state.inputValue}
+    onChange={this.handleInputChange}
+    type="text"
+    ref={(input)=>{this.input=input}}
+/>
+//函数部分通过this.input来拿到DOM节点
+    handleInputChange=(e)=>{
+        // this.setState({
+        //     inputValue:e.target.value
+        // })
+        //优化
+        // const value=e.target.value
+        const value=this.input.value
+        this.setState(()=>({
+            inputValue:value
+        }))
+    }
+~~~
+
+ref在V16后是以一个函数来表示
+
+
+
+------
+
+### 生命周期函数
+
+生命周期函数是指在某一时刻自动调用的函数
+
+每个组件都会有生命周期函数
+
+render()函数就是一个生命周期函数，他在state或props改变时，自动调用该函数渲染页面
+
+![1561628176103](C:\Users\ZX50V\AppData\Roaming\Typora\typora-user-images\1561628176103.png)
+
+分为4部分：
+
++ Initialization初始化
+
+> 数据的初始化
+
++ Mounting挂载
+
+> componentWillMount //组件即将挂载在页面前调用  **只进行一次** 也能写Ajax但是以后高深技术可能会有冲突
+>
+> render（）//渲染页面，以及state或者props改变的时候调用
+>
+> componentDidMount//组件挂载后自动执行 **只进行一次**  Ajax常用写在这里
+
++ Update数据更新
+
+> componentWillReceiveProps //在组件调用父组件传递的props，当这个组件第一次存在与父组件中，不会执行，如果组建已经存在与父组件中，才会执行
+>
+> shouldComponentUpdate //组建在更新之前执行，返回一个布尔值
+>
+> componentWillUpdate //组件更新之前执行，不过在shouldComponentUpdate 之后，根据shouldComponentUpdate 的值，如果true，则执行否则不执行
+>
+> render（）//渲染页面，以及state或者props改变的时候调用
+>
+> componentDidMount//组件挂载后自动执行
+
++ Unmounting剔除
+
+> componentWillUnmount
+>
+> //在组件被剔除后执行
+
+#### 借用shouldComponentUpdate 生命周期函数来避免子组件重复无谓的渲染
+
+不过只能用于性能优化，浅层比较，官网有详细说明<https://zh-hans.reactjs.org/docs/react-component.html>
+
+案例场景：当父组件的输入框输入是，在父组建里的子组件也会重新的渲染，但子组件的值并为改变，因此造成不必要的渲染
+
+~~~javascript
+shouldComponentUpdate (nextProps,nextState){ //函数带有两个参数一个是下一个传递给自组建的参数，一个是通过nextState.xxx与this.state.xxx进行比较
+ return nextProps.item !== this.props.item;
+}
+~~~
 
