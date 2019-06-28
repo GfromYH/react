@@ -473,6 +473,15 @@ flux在数据存储中可以有多个store，会存在数据依赖问题
 
 C需要去S里取数据，那么通过A这个异步分发请求，向S取数据，然后S去向R询问该返回什么样的数据，得到后，再将数据发送给C
 
+reducer是一个纯函数，固定的输入固定的输出。
+
+Redux核心API
+
+1. createStore() //创建一个store
+2. store.dispatch(action)//派发一个action，通过store向reducer进行产生新数据
+3. store.getState()//获取store里的内容
+4. store.subscribe //一旦store改变了，就触发订阅里的函数
+
 ~~~javascript
 cnpm install redux -D
 
@@ -482,7 +491,7 @@ cnpm install redux -D
 import {createStore} from 'redux'
 import reducer from './reducer'
 //创建store
-const store =createStore(reducer) //通过createStore来创建store
+const store =createStore(reducer，window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()) //通过createStore来创建store，第二个参数可以使用redux工具
 
 export default store
 
@@ -494,6 +503,26 @@ const defaultState={
     list:['1','2']
 }
 export default (state=defaultState,actions)=>{
+    // console.log(state,actions)
+    if (actions.type === 'change_input_value') {
+        //不能直接操作defaultState，所以需要深拷贝
+        const newState=JSON.parse(JSON.stringify(state))
+        newState.inputValue=actions.value;
+        return newState
+    }
+    if (actions.type === 'add_todo_item') {
+        //不能直接操作defaultState，所以需要深拷贝
+        const newState=JSON.parse(JSON.stringify(state))
+        newState.list.push(newState.inputValue)
+        newState.inputValue=''
+        return newState
+    }
+    if (actions.type === 'delete_todo_item') {
+        //不能直接操作defaultState，所以需要深拷贝
+        const newState=JSON.parse(JSON.stringify(state))
+        newState.list.splice(actions.value,1)
+        return newState
+    }
     return state;
 }
 
@@ -502,12 +531,107 @@ import store from './store'//自动找store下的index.js
 class App extends Component{
     constructor(props){
         super(props);
-        this.state=store.getState()//store中有getState函数来获取数据
-
+        this.state=store.getState()//store中有getState函数来获取数
+        store.subscribe(this.handleStoreChanged) //一旦store里的值发生改变便通知订阅者，触发handleStoreChanged方法
     }
     。。。
+        handleInputChange=(e)=>{
+        // this.setState({
+        //     inputValue:e.target.value
+        // })
+        //优化
+        const value=e.target.value
+        // const value=e.target.value
+        // this.setState(()=>({
+        //     inputValue:value
+        // }))
+        const action={
+            type:'change_input_value',
+            value
+        }
+        store.dispatch(action) //分发action使store向reducer获取到新的数据
+    }
+    handleStoreChanged=()=>{
+        this.setState(()=>(store.getState()))
+    }
+    handleBtnAdd=()=>{
+        // this.setState({
+        //     list:[...this.state.list,this.state.inputValue],
+        //     inputValue:''
+        // })
+        // this.setState((prevstate)=>({
+        //     list:[...prevstate.list,prevstate.inputValue],
+        //     inputValue:''
+        // }))
+        const action={
+            type:'add_todo_item'
+        }
+        store.dispatch(action)
+    }
+    handleItemDelete=(index)=>{
+        // console.log(index)
+    //     const list = [...this.state.list]
+    //     list.splice(index,1)
+    //     // console.log(list)
+    //     this.setState({
+    //         list
+    // })
+        const action={
+            type:'delete_todo_item',
+            value:index
+        }
+        store.dispatch(action)
+    
 }
 ~~~
+
+将action拆分出来
+
+~~~javascript
+//actionTypes.js
+export const CHANGE_INPUT_VALUE ='change_input_value'
+export const ADD_TODO_ITEM ='add_todo_item'
+export const DELETE_TODO_ITEM ='delete_todo_item'
+
+
+//actionCreators.js
+import {CHANGE_INPUT_VALUE,DELETE_TODO_ITEM,ADD_TODO_ITEM} from './actionTypes'
+export const getHandleInputChange=(value)=>({
+    type:CHANGE_INPUT_VALUE,
+    value:value
+})
+
+export const getHandleBtnAdd=()=>({
+    type:ADD_TODO_ITEM
+})
+
+export const getHandleItemDelete=(index)=>({
+    type:DELETE_TODO_ITEM,
+    value:index
+})
+
+~~~
+
+
+
+**redux工作流：**
+
+当一个页面想要获取store里的数据，通过this.state=store.getState()来获取数据，而store从Reducer函数中来获取最初的默认数据，而当store的数据需要改变时，需要在当前页面开发一个action通过store.dispatch(action)来分发改变的请求，而该请求通过store传递给Reducer函数，Reducer函数通过actions的type判断，进行一些操作(如果要改变state值，要先深拷贝，而不能直接修改state,JSON.parse(JSON.stringfy(state)))然后返回newState，store拿到reducer传来的newState，自己将自己更新了，然后再当前页面通过store.subscribe(更新函数)来将旧的state替换掉
+
+这里的更新函数为
+
+~~~javascript
+//1
+handleStoreChanged=()=>{
+    this.setState(()=>(store.getState()))
+}
+//2
+handleStoreChanged=()=>{
+    this.setState(store.getState())
+}
+~~~
+
+#### Redux-thunk中间件
 
 
 
@@ -526,3 +650,15 @@ import {Button} from 'antd'; //跟ivew差不多，组件首字母都是大写
 ~~~
 
 <https://ant.design/docs/react/introduce-cn>
+
+------
+
+### UI组件与容器组件与无状态组件
+
+UI组件与容器组件，相当于有一个普通的组件，拆分出两个组件
+
+UI组件：指的是视图相关的内容的一个组件，UI组件通过this.props.XXX来获得值或者方法
+
+容器组件：指的是偏向逻辑方面的组件，通过调用UI组件，所以容器组件是UI组件的父级，通过组件间的传值，来帮助UI组件实现功能
+
+无状态组件：就是一个函数，有一个参数为props，当一个普通的组件只有一个render函数的时候，可以使用无状态组件，性能会比UI组件高，因为没有需要执行的生命周期函数，通过props.xxx来调用父组件传来的值
