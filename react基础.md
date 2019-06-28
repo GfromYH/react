@@ -388,3 +388,141 @@ shouldComponentUpdate (nextProps,nextState){ //函数带有两个参数一个是
 }
 ~~~
 
+------
+
+### react-transition-group
+
+react动画效果第三方模块包
+
+~~~javascript
+cnpm install react-transition-group --save
+
+import {CSSTransition，TransitionGroup} from 'react-transition-group'
+
+<CSSTransition
+        in={this.state.show}//判断条件，根据true/false来执行动画
+        timeout={300}//播放动画时间300ms
+        classNames="alert"//定义了这个在CSS中就要alert-enter，跟Vue中定义了name一样
+        unmountOnExit//一些钩子函数
+        onEnter={() => setShowButton(false)}
+        onExited={() => setShowButton(true)}
+        appear={true}//页面刚显示就会有动画效果
+>
+	需要包裹的单个标签    
+</CSSTransition>
+
+//如果用动画组的话里面需要在包裹一个CSSTransition
+<TransitionGroup>
+    <CSSTransition
+//如果是动画组，那么这个in就不需要添加
+        //in={this.state.show}//判断条件，根据true/false来执行动画
+        timeout={300}//播放动画时间300ms
+        classNames="alert"//定义了这个在CSS中就要alert-enter，跟Vue中定义了name一样
+        unmountOnExit//一些钩子函数
+        onEnter={() => setShowButton(false)}
+        onExited={() => setShowButton(true)}
+        appear={true}//页面刚显示就会有动画效果
+	>
+		需要包裹的多个标签    ，常用于循环列表这类的，类似与Vue中的transition-group
+	</CSSTransition>
+</TransitionGroup>
+
+CSS部分
+.fade-enter, .fade-appear{
+    opacity: 0;
+}
+.fade-enter-active,.fade-appear-active{
+    opacity: 1;
+    transition: opacity 1s ease-in;
+}
+.fade-enter-done,.fade-appear-done{
+    opacity: 1;
+}
+.fade-exit{
+    opacity: 1;
+}
+.fade-exit-active{
+    opacity: 0;
+    transition: opacity .3s ease-in;
+}
+.fade-exit-done{
+    opacity: 0;
+}
+
+~~~
+
+<https://reactcommunity.org/react-transition-group/css-transition>
+
+实现起来跟Vue里的transition 与transition-group
+
+------
+
+### Redux
+
+redux=reducer+flux
+
+flux在数据存储中可以有多个store，会存在数据依赖问题
+
+![1561707159762](C:\Users\ZX50V\AppData\Roaming\Typora\typora-user-images\1561707159762.png)
+
++ React工作流程
+
+![1561707381822](C:\Users\ZX50V\AppData\Roaming\Typora\typora-user-images\1561707381822.png)
+
+有点类似，前端（component/C），中间件（Action Creators/A），后台（store/S），数据库（reducers/R）
+
+C需要去S里取数据，那么通过A这个异步分发请求，向S取数据，然后S去向R询问该返回什么样的数据，得到后，再将数据发送给C
+
+~~~javascript
+cnpm install redux -D
+
+首先创建一个store包来管理redux
+创建一个index.js
+//index.js
+import {createStore} from 'redux'
+import reducer from './reducer'
+//创建store
+const store =createStore(reducer) //通过createStore来创建store
+
+export default store
+
+创建reducer.js
+//reducer必须暴露的是一个函数
+//reducer.js
+const defaultState={
+    inputValue:'',
+    list:['1','2']
+}
+export default (state=defaultState,actions)=>{
+    return state;
+}
+
+//获取store的js文件
+import store from './store'//自动找store下的index.js
+class App extends Component{
+    constructor(props){
+        super(props);
+        this.state=store.getState()//store中有getState函数来获取数据
+
+    }
+    。。。
+}
+~~~
+
+
+
+------
+
+### Ant Design
+
+~~~javascript
+cnpm install antd --save
+
+首先引入样式
+import 'antd/dist/antd.css'; // or 'antd/dist/antd.less'
+
+然后按需引入
+import {Button} from 'antd'; //跟ivew差不多，组件首字母都是大写
+~~~
+
+<https://ant.design/docs/react/introduce-cn>
