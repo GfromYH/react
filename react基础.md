@@ -1,4 +1,10 @@
+[TOC]
+
+
+
 ## React Fiber(React)
+
+
 
 React Fiber指的是react 版本16之后，因为加入了**事件优先级**，所以称版本为16之后的为**React Fiber**
 
@@ -295,13 +301,13 @@ props或者state值改变了，render()函数就执行一次，所以就会有�
 
 + diff算法
 
-![1561626639235](C:\Users\ZX50V\AppData\Roaming\Typora\typora-user-images\1561626639235.png)
+![1561626639235](imgs/diff-1.png)
 
 1. diff算法是同层之间比较，并且只比较一层，当你第一层不一样时，他就不比较下面的了，直接删除第一层以下的所有节点，并将新的虚拟DOM修改到原始虚拟DOM，虽然这样做在渲染虚拟DOM上不是很好，但是算法简单，节省了比较时间
 2. react中触发diff算法一般都是在setState这个异步函数中进行的，当多个setS塔特、调用时，react会将多个setState当成一个，生成一个虚拟DOM，进行一次比较，而不会多次生成虚拟DOM
 3. key值是唯一的，且循环时最好不要用index作为key值，因为index会改变，二key需要稳定的，当前几个的值未被改变时，只添加一个新的属性值，那么绑定了key值就会节省比较的时间优化性能，而为绑定key值则会重新比较，相对来说会消耗性能
 
-![1561627023197](C:\Users\ZX50V\AppData\Roaming\Typora\typora-user-images\1561627023197.png)
+![1561627023197](imgs/diff-2.png)
 
 ------
 
@@ -342,7 +348,7 @@ ref在V16后是以一个函数来表示
 
 render()函数就是一个生命周期函数，他在state或props改变时，自动调用该函数渲染页面
 
-![1561628176103](C:\Users\ZX50V\AppData\Roaming\Typora\typora-user-images\1561628176103.png)
+![1561628176103](imgs/life-circle.png)
 
 分为4部分：
 
@@ -463,11 +469,11 @@ redux=reducer+flux
 
 flux在数据存储中可以有多个store，会存在数据依赖问题
 
-![1561707159762](C:\Users\ZX50V\AppData\Roaming\Typora\typora-user-images\1561707159762.png)
+![1561707159762](imgs/redux-1.png)
 
 + React工作流程
 
-![1561707381822](C:\Users\ZX50V\AppData\Roaming\Typora\typora-user-images\1561707381822.png)
+![1561707381822](imgs/redux-2.png)
 
 有点类似，前端（component/C），中间件（Action Creators/A），后台（store/S），数据库（reducers/R）
 
@@ -703,7 +709,7 @@ redux DevTools使用
 
 redux-thunk使用原理，是将异步操作放到action里进行操作，对store.dispath()进行了一次升级，使得action不仅仅可以是对象也可以是函数，如果是函数，则会将函数执行到底
 
-![1561784404484](C:\Users\ZX50V\AppData\Roaming\Typora\typora-user-images\1561784404484.png)
+![1561784404484](imgs/redux-3.png)
 
 
 
@@ -826,7 +832,11 @@ export default connect(mapStateToProps,mapDispatchToProps)(TodoList);
 
 ~~~
 
-**connect**通过Provider传递过来的store与TodoList建立连接，然后设置**mapStateToProps**的规则来将state参数与store进行映射，将映射到组件的props上，**mapDispatchToProps**规则将dispatch参数与store进行映射。
+**connect**通过Provider传递过来的store与TodoList建立连接，然后设置**mapStateToProps**的规则来将state参数与store进行映射，将映射到组件的props上，**mapDispatchToProps**规则将dispatch参数与store进行映射。并且用了react-redux就不需要再用store.subscribe()函数来订阅更新改变，<u>connect会自动帮我们改变，只要数据变化，页面就会自动改变</u>主要是因为规则里映射了state与store的关系
+
+
+
+！！！TodoList可以简化为无状态组件(方法，节省性能)也可以是UI组件，只有一个render函数的class，当**connect**将逻辑与无状态组件结合时，**返回的是一个容器组件**
 
 ------
 
@@ -854,4 +864,4 @@ UI组件：指的是视图相关的内容的一个组件，UI组件通过this.pr
 
 容器组件：指的是偏向逻辑方面的组件，通过调用UI组件，所以容器组件是UI组件的父级，通过组件间的传值，来帮助UI组件实现功能
 
-无状态组件：就是一个函数，有一个参数为props，当一个普通的组件只有一个render函数的时候，可以使用无状态组件，性能会比UI组件高，因为没有需要执行的生命周期函数，通过props.xxx来调用父组件传来的值
+无状态组件：就是一个函数，有一个参数为**（props）**，当一个普通的组件只有一个render函数的时候，可以使用无状态组件，性能会比UI组件高，因为没有需要执行的生命周期函数，通过props.xxx来调用父组件传来的值
