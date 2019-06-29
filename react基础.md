@@ -633,7 +633,200 @@ handleStoreChanged=()=>{
 
 #### Redux-thunk中间件
 
+主要用来配合react来使用异步ajax请求
 
+他可以使action**不仅仅是一个js对象**，还可以是**一个函数**，该函数内**进行ajax请求**
+
+~~~javascript
+cnpm install redux-thunk --save
+
+//引用，在创建store
+import {createStore,applyMiddleware,compose} from 'redux'
+import reducer from './reducer'
+import thunk from 'redux-thunk'
+//创建store
+//可以允许redux DevTools正常使用
+const composeEnhancers =
+    window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ ?
+        window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({}) : compose;
+
+const enhancer = composeEnhancers(
+    applyMiddleware(thunk),
+    // other store enhancers if any
+);
+const store =createStore(
+    reducer, enhancer
+)
+
+export default store
+
+
+~~~
+
+~~~javascript
+//actionCreators.js
+export const getInitList=(data)=>({
+    type:INIT_LIST,
+    data
+})
+export const getTodoItem=()=> {
+    //返回的函数可以带一个dispatch参数来分发
+    return (dispatch)=>{
+        axios.get('/mock/data.json')
+            .then(res=>{
+                const action=getInitList(res.data)
+                dispatch(action);
+                return;
+            })
+
+    }
+}
+//app.js
+//生命周期
+    componentDidMount(){
+        //返回一个函数
+        const action=getTodoItem()
+        store.dispatch(action)
+    }
+
+~~~
+
+
+
+redux-thunk使用
+
+<https://github.com/reduxjs/redux-thunk>
+
+redux DevTools使用
+
+<https://github.com/zalmoxisus/redux-devtools-extension>
+
+redux-thunk使用原理，是将异步操作放到action里进行操作，对store.dispath()进行了一次升级，使得action不仅仅可以是对象也可以是函数，如果是函数，则会将函数执行到底
+
+![1561784404484](C:\Users\ZX50V\AppData\Roaming\Typora\typora-user-images\1561784404484.png)
+
+
+
+#### redux-saga中间件
+
+<https://github.com/redux-saga/redux-saga>
+
+设计原理：单独的把异步逻辑拆分出来放到一个文件里去，当页面中将一个action派发给store后，saga会监听到该dispatch信息，通过**takeEvery**方法来监听，然后通过**generator**语法方式处理异步请求，再通过**put**将异步请求好的action再次派发
+
+~~~javascript
+cnpm install --save redux-saga
+
+~~~
+
+~~~javascript
+//创建store index.js
+import {createStore,applyMiddleware,compose} from 'redux'
+import reducer from './reducer'
+import createSagaMiddleware from 'redux-saga'
+import mySaga from './sagas'
+
+// create the saga middleware
+const sagaMiddleware = createSagaMiddleware()
+
+//创建store
+const composeEnhancers =
+    window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ ?
+        window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({}) : compose;
+
+const enhancer = composeEnhancers(
+    applyMiddleware(sagaMiddleware),
+    // other store enhancers if any
+);
+const store =createStore(
+    reducer, enhancer
+)
+
+// then run the saga
+sagaMiddleware.run(mySaga)
+
+export default store
+
+//还要创建一个sagas文件 sagas.js
+//sagas.js返回的是一个函数并且该函数严格遵守generator语法
+import { call, put, takeEvery, takeLatest } from 'redux-saga/effects'
+import {getInitList} from './actionCreators'
+import {LIST_INIT} from './actionTypes'
+import axios from 'axios'
+
+
+function* getList() {
+    try {
+        const res = yield axios.get('/mock/data.json')
+        const action =getInitList(res.data)
+        yield put(action)
+    }catch (e) {
+        console.log("获取数据失败")
+    }
+}
+
+function* mySaga() {
+    yield takeEvery(LIST_INIT, getList);
+}
+
+export default mySaga;
+
+~~~
+
+------
+
+### react-redux
+
+<https://react-redux.js.org/introduction/quick-start>
+
+~~~javascript
+cnpm install --save react-redux
+
+//入口文件
+import React from 'react';
+import ReactDOM from 'react-dom';
+import TodoList from './TodoList';
+//通过Provider这个核心API将组件包裹住通过传递store来避免子组件每次都需要getState来获取数据
+import {Provider } from 'react-redux'
+import store from './store'
+const App=(
+    <Provider store={store}>
+        <TodoList></TodoList>
+    </Provider>
+)
+ReactDOM.render(App, document.getElementById('root'));
+
+//TodoList.js 省略部分
+//迎入connect核心API
+import {connect} from 'react-redux'
+//通过this.props.inputValue来获取值
+<Input
+    value={this.props.inputValue}
+    onChange={this.props.handleInputChange}
+    type="text"
+    // ref={(input)=>{this.Input=input}}
+    placeholder='todo info'
+    style={{width:'300px'}}
+/>
+const mapStateToProps=(state)=>{
+    return{
+        inputValue:state.inputValue,
+        list:state.list
+    }
+}
+const mapDispatchToProps = (dispatch)=>{
+    return{
+        handleInputChange(e){
+            const value=e.target.value
+            const action=getHandleInputChange(value)
+            dispatch(action)
+        }
+    }
+}
+export default connect(mapStateToProps,mapDispatchToProps)(TodoList);
+
+~~~
+
+**connect**通过Provider传递过来的store与TodoList建立连接，然后设置**mapStateToProps**的规则来将state参数与store进行映射，将映射到组件的props上，**mapDispatchToProps**规则将dispatch参数与store进行映射。
 
 ------
 
