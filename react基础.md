@@ -272,6 +272,14 @@ TodoItem.propTypes={
 TodoItem.defaultProps={
     test:"hello world"
 }
+/**
+写在class类里，给组件类添加对象
+static propTypes={
+    test:PropTypes.string.isRequired,
+    item:PropTypes.string,
+    handleItemDelete:PropTypes.func
+}
+*/
 export default TodoItem
 
 ~~~
