@@ -138,6 +138,20 @@ export default App;
        }
    ~~~
 
+#### 约束性组件与非约束性组建
+
++ 非约束性组件
+
+~~~javascript
+<input defaultValue='a' /> 这个defaultValue就是原生DOM中的value，只不过不受react管理过程
+~~~
+
++ 约束性组件
+
+~~~javascript
+<input value={this.state.msg} onChange={this.handleChange}/>约束性组件。指react完全管理输入的过程，必须需要onChange监听变化
+~~~
+
 
 
 ------
@@ -229,7 +243,15 @@ handleBtnClick=(name)=>{
 
 =======================================================================================
 
-在react中通过**this.props**来获取父组件向子组件传递的值
+在react中通过**this.props**来获取父组件向子组件传递的值（值，跟方法）
+
+子组件中通过父组件传过来的方法，来调用该方法，并将自己的值传递给父组件
+
+~~~javascript
+<button onClick={()=>this.props.handleFather(this.state.msg)}>子组件传值给父组件 </button>
+~~~
+
+
 
 ~~~javascript
 父组件
