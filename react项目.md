@@ -74,3 +74,48 @@ table {
 
 ~~~
 
+~~~javascript
+create-react-app 项目名
+
+src目录下
+Components //复用组件
+Store //redux
+	actionCreators
+    actionTypes
+    index
+    reducer
+Pages //一级页面
+Api //接口
+Common //公共部分
+Router //路由配置
+~~~
+
+~~~javascript
+cnpm install redux react-redux react-thunk --save
+cnpm install redux-thunk --save
+cnpm install react-router-dom --save
+
+//app.js
+import React,{Component,Fragment} from 'react'
+import {Provider} from 'react-redux'
+import store from './Store'
+import {BrowserRouter as Router ,Route,Link} from  'react-router-dom'
+export default class App extends Component{
+    constructor(props){
+        super(props);
+    }
+    render() {
+        return(
+            <Provider store={store}>
+                <Router>
+                <div>
+                    hello world
+                </div>
+                </Router>
+            </Provider>
+        )
+    }
+}
+
+~~~
+
