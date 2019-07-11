@@ -497,6 +497,28 @@ CSS部分
 
 ### React-Router-dom
 
+~~~javascript
+cnpm install react-router-dom --save
+
+~~~
+
+~~~javascript
+//引入几个常用的组件
+import {BrowserRouter as Router ,Route,Link,Switch} from  'react-router-dom'
+//BrowserRouter相当于history，还有一个与之对应的是HashRouter
+<Router>
+    //Switch表示当前页面只能由一个路由显示
+    <Switch>
+    //Route 组件key则是path ，value则是组件component
+    //还有一个Link组件，相当于一个a标签，点击进行跳转
+    	<Link to="/">Admin</Link>
+		<Link to="/login">Login</Link>
+        <Route path="/login" component={Login}></Route>
+        <Route path="/" component={Admin}></Route>
+	</Switch>
+</Router>
+~~~
+
 
 
 react路由
