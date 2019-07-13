@@ -226,3 +226,26 @@ withRouter（非路由组件）
 
 会给非路由组件赋予history/location/match这三个对象
 
+------
+
+#### 关于react脚手架中跨域问题
+
+~~~javascript
+cnpm install http-proxy-middleware --save
+
+//在src目录下创建setupProxy.js文件
+const proxy = require('http-proxy-middleware')
+//后台接口http://localhost:3001/api/XXX/XXX
+module.exports = function(app) {
+    app.use(proxy('/api', {
+        target: 'http://localhost:3001/api/', //目标接口地址
+        ws:true,
+        changeOrigin:true,
+        pathRewrite: {
+            "^/api": ""
+        }
+    }))
+}
+
+~~~
+
