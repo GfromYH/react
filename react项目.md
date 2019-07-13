@@ -119,3 +119,110 @@ export default class App extends Component{
 
 ~~~
 
+------
+
+### React+Antd
+
+#### reset.css路径问题
+
+~~~javascript
+//在react项目中要想初始化css最好在public文件夹下迎入reset.css
+
+//将reset.css挂载到index.html上
+
+//1.
+    <link rel="stylesheet" href="./css/reset.css">
+//通过相对路径写法，如果路由层级少可能不会出错，但是如果有2级或以上则会出错，因为是想读路径
+        
+//2.合理写法
+       <link rel="stylesheet" href="/css/reset.css"> 
+~~~
+
+
+
+------
+
+#### 动态添加menu菜单
+
++ reduce++递归
+
+~~~javascript
+    //动态添加列表
+    //通过reduce+递归，也可以map+递归
+    getMenuNodes=(menuList)=>{
+       return menuList.reduce((pre,item)=>{
+           if (!item.children) {
+               pre.push((
+                   <Menu.Item key={item.key}>
+                       <Link to={item.key}>
+                           <Icon type={item.icon} />
+                           <span>{item.title}</span>
+                       </Link>
+                   </Menu.Item>
+               ))
+           }else{
+               pre.push((
+                   <SubMenu
+                       key={item.key}
+                       title={
+                           <span>
+                                <Icon type={item.icon} />
+                                <span>{item.title}</span>
+                           </span>
+                       }
+                   >
+                       {this.getMenuNodes(item.children)}
+                   </SubMenu>
+               ))
+           }
+           return pre
+       },[])
+    }
+~~~
+
++ map+递归
+
+~~~javascript
+getMenuNodes=(menuList)=>{
+       return menuList.map((item)=>{
+           if (!item.children) {
+              return (
+                   <Menu.Item key={item.key}>
+                       <Link to={item.key}>
+                           <Icon type={item.icon} />
+                           <span>{item.title}</span>
+                       </Link>
+                   </Menu.Item>
+               )
+           }else{
+               return(
+                   <SubMenu
+                       key={item.key}
+                       title={
+                           <span>
+                                <Icon type={item.icon} />
+                                <span>{item.title}</span>
+                           </span>
+                       }
+                   >
+                       {this.getMenuNodes(item.children)}
+                   </SubMenu>
+               )
+           }
+          
+       })
+    }
+~~~
+
+
+
+------
+
+#### 将不是路由的组件变成路由组件
+
+通过react-router-dom中的高阶组件withRouter
+
+withRouter（非路由组件） 
+
+会给非路由组件赋予history/location/match这三个对象
+
